@@ -13,7 +13,8 @@ Simple, lightweight userspace process manager for OS X.
   - Re-run tests for all jobs
   - Kill and kickoff processes for jobs with different state
   - Re-persist state
-- Fit in `.config/overseer/`
+- Config in `$XDG_CONFIG_HOME/overseer`, default `$HOME/.config/overseer/`
+- Runtime data in `$XDG_DATA_HOME/overseer`, default `$HOME/.local/share/overseer`
 - Kick off process and restart them if they go down
 - Check if process should be running with arbitrary test
 
@@ -23,12 +24,32 @@ Event + State + Config -> State + Processes
 
 ## State Machine
 
+```
+Start
+-> CheckIfRunning
+
+CheckIfRunning
+-> DaemonRunning
+-> DaemonNotRunning
+
+DaemonRunning
+-> SendTrigger
+
+SendTrigger
+-> 
+
+Exit
+ReadConfig
+ReadState
+
+```
+
 ## Types
 
 ```rust
 struct Command {
   exe: String,
-  args: Vec<String>
+  args: Vec<String>,
 };
 
 struct Job { 
@@ -37,5 +58,7 @@ struct Job {
   test_command: Option<Command>,
 };
 
-struct Config(Vec<Job>);
+struct Config {
+  jobs: Vec<Job>,
+}
 ```
