@@ -9,6 +9,7 @@ readme = "README.md"
 license = "MIT"
 
 [dependencies]
+syslog = "~3.1.0"
 
 [[bin]]
 name = "overseer"

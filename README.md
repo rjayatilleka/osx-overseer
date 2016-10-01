@@ -20,29 +20,35 @@ Simple, lightweight userspace process manager for OS X.
 
 # Architecture
 
-Event + State + Config -> State + Processes
+## Client State Machine
 
-## State Machine
-
-```
-Start
--> CheckIfRunning
-
-CheckIfRunning
--> DaemonRunning
--> DaemonNotRunning
-
-DaemonRunning
--> SendTrigger
-
-SendTrigger
--> 
-
-Exit
-ReadConfig
-ReadState
-
-```
+- Start
+  - -> InitHomes
+- InitHomes
+  - Success -> CheckSocketExists(Homes)
+  - Failure -> Exit(Err(InitHomesError))
+- CheckSocketExists(Homes)
+  - Success -> OpenSocket(Homes)
+  - Failure -> LaunchDaemon
+- OpenSocket(Homes)
+  - Success -> SendRequest(Socket)
+  - Failure -> DeleteSocketFile(Homes)
+- SendRequest(Socket)
+  - Success -> ReadResponse(Socket)
+  - Failure -> CloseSocket(Socket, Exit(Err(SocketSendError)))
+- CloseSocket(Socket, State)
+  - -> param state
+- DeleteSocketFile(Homes)
+  - -> LaunchDaemon(Homes)
+- LaunchDaemon(Homes)
+  - Success -> OpenSocket(Homes)
+  - Failure -> Exit(Err(DaemonLaunchError))
+- ReadResponse(Socket)
+  - Success -> CloseSocket(Socket, PrintResponse(Response))
+  - Failure -> CloseSocket(Socket, Exit(Err(SocketReadError)))
+- PrintResponse(Response)
+  - -> Exit(Ok(()))
+- Exit(Result<(), Error>)
 
 ## Types
 
