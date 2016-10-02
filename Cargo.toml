@@ -10,6 +10,7 @@ license = "MIT"
 
 [dependencies]
 syslog = "~3.1.0"
+unix_socket = "0.5.0"
 
 [[bin]]
 name = "overseer"
