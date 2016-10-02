@@ -2,9 +2,13 @@
 //!
 //! Author: Ramith Jayatilleka
 
+use types::*;
+
+use unix_socket::UnixDatagram;
+
 /// Represents errors in client state machine
 #[derive(Debug)]
-enum ClientSMError {
+pub enum ClientSMError {
     TodoErr,
 }
 

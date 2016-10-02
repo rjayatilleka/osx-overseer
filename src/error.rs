@@ -2,6 +2,9 @@
 //!
 //! Author: Ramith Jayatilleka
 
+use client::ClientSMError;
+use std::{error, fmt};
+
 impl error::Error for ClientSMError {
     fn description(&self) -> &str {
         match *self {
