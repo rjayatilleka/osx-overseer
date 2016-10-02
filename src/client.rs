@@ -8,7 +8,7 @@ use unix_socket::UnixDatagram;
 
 /// Represents errors in client state machine
 #[derive(Debug)]
-pub enum ClientSMError {
+pub enum ClientError {
     TodoErr,
 }
 
@@ -24,6 +24,6 @@ enum ClientState {
     LaunchDaemon(Homes),
     ReadResponse(UnixDatagram),
     PrintResponse(Response),
-    Exit(Result<(), ClientSMError>),
+    Exit(Result<(), ClientError>),
     End,
 }

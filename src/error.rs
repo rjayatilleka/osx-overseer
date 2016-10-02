@@ -2,26 +2,26 @@
 //!
 //! Author: Ramith Jayatilleka
 
-use client::ClientSMError;
+use client::ClientError;
 use std::{error, fmt};
 
-impl error::Error for ClientSMError {
+impl error::Error for ClientError {
     fn description(&self) -> &str {
         match *self {
-            ClientSMError::TodoErr => "Todo",
+            ClientError::TodoErr => "Todo",
         }
     }
     fn cause(&self) -> Option<&error::Error> {
         match *self {
-            ClientSMError::TodoErr => None,
+            ClientError::TodoErr => None,
         }
     }
 }
 
-impl fmt::Display for ClientSMError {
+impl fmt::Display for ClientError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            ClientSMError::TodoErr => write!(f, "TodoErr"),
+            ClientError::TodoErr => write!(f, "TodoErr"),
         }
     }
 }
