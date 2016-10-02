@@ -6,5 +6,3 @@ pub mod error;
 pub mod client;
 pub mod daemon;
 pub mod types;
-
-mod example_sm;

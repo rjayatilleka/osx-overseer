@@ -19,8 +19,6 @@ pub struct Response {
 }
 
 pub fn get_homes() -> Homes {
-    let home = env::var("HOME").unwrap();
-
     let config_home_prefix =
         get_safe_env_var("XDG_CONFIG_HOME", env::var("HOME").unwrap() + "/.config");
     let data_home_prefix =
