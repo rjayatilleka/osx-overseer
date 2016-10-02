@@ -25,5 +25,5 @@ enum ClientState {
     ReadResponse(UnixDatagram),
     PrintResponse(Response),
     Exit(Result<(), ClientError>),
-    End,
+    Done,
 }

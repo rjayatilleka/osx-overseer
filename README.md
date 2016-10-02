@@ -20,6 +20,29 @@ Simple, lightweight userspace process manager for OS X.
 
 # Architecture
 
+## Daemon State Machine
+
+- Start
+  - -> InitHomes
+- InitHomes
+  - Success -> OpenSocket(Homes)
+  - Failure -> Exit(Err(InitHomesError))
+- OpenSocket(Homes)
+  - Success -> ReceiveRequest(Socket)
+  - Failure -> Exit(Err(SocketOpenError))
+- ReceiveRequest(Socket)
+  - Success -> ProcessRequest(Socket, Request)
+  - Failure -> Exit(Err(SocketReadError))
+- ProcessRequest(Socket, Request)
+  - "DIE" -> Exit(Ok(()))
+  - other -> SendResponse(Socket)
+- SendResponse(Socket)
+  - Success -> ReceiveRequest(Socket)
+  - Failure -> Exit(Err(SocketWriteError))
+- Exit(Result<(), Error>)
+  - -> Done
+- Done
+
 ## Client State Machine
 
 - Start
@@ -49,6 +72,8 @@ Simple, lightweight userspace process manager for OS X.
 - PrintResponse(Response)
   - -> Exit(Ok(()))
 - Exit(Result<(), Error>)
+  - -> Done
+- Done
 
 ## Types
 
