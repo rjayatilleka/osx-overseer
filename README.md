@@ -26,7 +26,6 @@ Simple, lightweight userspace process manager for OS X.
   - -> InitHomes
 - InitHomes
   - Success -> OpenSocket(Homes)
-  - Failure -> Exit(Err(InitHomesError))
 - OpenSocket(Homes)
   - Success -> ReceiveRequest(Socket)
   - Failure -> Exit(Err(SocketOpenError))

@@ -4,7 +4,8 @@
 
 use types;
 use types::Homes;
-use sm::Verdict;
+use sm;
+use sm::Verdict::{Continue, End};
 
 use std::io;
 use std::io::Write;
@@ -17,6 +18,7 @@ pub enum DaemonError {
 }
 
 type Request = [u8; 10];
+type Verdict = sm::Verdict<DaemonState>;
 
 /// States for client state machine
 #[derive(Debug)]
@@ -33,35 +35,41 @@ pub enum DaemonState {
 
 
 /// Start -> InitHomes
-fn handle_start() -> Verdict<DaemonState> {
-    Verdict::Continue(DaemonState::InitHomes)
+fn handle_start() -> Verdict {
+    Continue(DaemonState::InitHomes)
 }
 
-/// InitHomes -> OpenSocket or Fatal
-fn handle_init_homes() -> Verdict<DaemonState> {
+/// InitHomes -> OpenSocket
+fn handle_init_homes() -> Verdict {
     let homes = types::get_homes();
-    println!("{:?}", homes);
-    Verdict::Continue(DaemonState::Success)
+    Continue(DaemonState::OpenSocket(homes))
+}
+
+/// OpenSocket -> ReceiveRequest or Fatal
+fn handle_open_socket(homes: Homes) -> Verdict {
+    Continue(DaemonState::Success)
 }
 
 /// Fatal
-fn handle_fatal(e: DaemonError) -> Verdict<DaemonState> {
+fn handle_fatal(e: DaemonError) -> Verdict {
     let _ = writeln!(&mut io::stderr(), "overseerd FATAL: {}", e);
-    Verdict::End(1)
+    End(1)
 }
 
 /// Success
-fn handle_success() -> Verdict<DaemonState> {
+fn handle_success() -> Verdict {
     println!("overseerd success");
-    Verdict::End(0)
+    End(0)
 }
 
-pub fn execute_daemon_step(state: DaemonState) -> Verdict<DaemonState> {
+/// Execute one step in DaemonState state machine.
+pub fn execute_daemon_step(state: DaemonState) -> Verdict {
     match state {
         DaemonState::Start => handle_start(),
         DaemonState::InitHomes => handle_init_homes(),
+        DaemonState::OpenSocket(homes) => handle_open_socket(homes),
         DaemonState::Fatal(e) => handle_fatal(e),
         DaemonState::Success => handle_success(),
-        _ => Verdict::Continue(DaemonState::Fatal(DaemonError::TodoErr)),
+        _ => Continue(DaemonState::Fatal(DaemonError::TodoErr)),
     }
 }
