@@ -72,6 +72,17 @@ fn handle_success() -> i32 {
     0
 }
 
+// /// Execute one step in DaemonState state machine.
+// pub fn execute_daemon_step(state: DaemonState) -> Verdict<DaemonState> {
+//     sm_generate!(
+//         (DaemonState::Start, handle_start),
+//         (DaemonState::InitHomes, handle_init_homes),
+//         (DaemonState::OpenSocket, handle_open_socket),
+//         (DaemonState::Fatal, handle_fatal),
+//         (DaemonState::Success, handle_success))
+//     }
+// }
+
 /// Execute one step in DaemonState state machine.
 pub fn execute_daemon_step(state: DaemonState) -> Verdict<DaemonState> {
     match state {

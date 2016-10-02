@@ -45,7 +45,7 @@ impl error::Error for DaemonError {
 impl fmt::Display for DaemonError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            DaemonError::SocketOpenErr(_) => write!(f, "Failed to open socket"),
+            DaemonError::SocketOpenErr(ref c) => write!(f, "Failed to open socket: {}", c),
             DaemonError::TodoErr => write!(f, "TodoErr"),
         }
     }
