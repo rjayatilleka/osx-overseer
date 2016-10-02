@@ -3,13 +3,12 @@
 //! Author: Ramith Jayatilleka
 
 use std::env;
-use std::path::PathBuf;
 
 /// Holds concrete values for XDG_CONFIG_HOME and XDG_DATA_HOME
 #[derive(Debug)]
 pub struct Homes {
-    pub config_home: PathBuf,
-    pub data_home: PathBuf,
+    pub config_home: String,
+    pub data_home: String,
 }
 
 /// Holds a response from the daemon
@@ -25,8 +24,8 @@ pub fn get_homes() -> Homes {
         get_safe_env_var("XDG_DATA_HOME", env::var("HOME").unwrap() + "/.local/share");
 
     Homes {
-        config_home: PathBuf::from(config_home_prefix + "/overseer"),
-        data_home: PathBuf::from(data_home_prefix + "/overseer"),
+        config_home: config_home_prefix + "/overseer",
+        data_home: data_home_prefix + "/overseer",
     }
 }
 

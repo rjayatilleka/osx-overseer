@@ -4,8 +4,7 @@
 
 use types;
 use types::Homes;
-use sm;
-use sm::Verdict::{Continue, End};
+use sm::Verdict;
 
 use std::io;
 use std::io::Write;
@@ -14,11 +13,19 @@ use unix_socket::UnixDatagram;
 /// Represents errors in client state machine
 #[derive(Debug)]
 pub enum DaemonError {
+    SocketOpenErr(io::Error),
     TodoErr,
 }
 
+impl From<DaemonError> for DaemonState {
+    fn from(e: DaemonError) -> DaemonState {
+        DaemonState::Fatal(e)
+    }
+}
+
+type StepResult = Result<DaemonState, DaemonError>;
+
 type Request = [u8; 10];
-type Verdict = sm::Verdict<DaemonState>;
 
 /// States for client state machine
 #[derive(Debug)]
@@ -26,50 +33,52 @@ pub enum DaemonState {
     Start,
     InitHomes,
     OpenSocket(Homes),
-    ReceiveRequest(UnixDatagram),
-    ProcessRequest(UnixDatagram, Request),
-    SendResponse(UnixDatagram),
+    // ReceiveRequest(UnixDatagram),
+    // ProcessRequest(UnixDatagram, Request),
+    // SendResponse(UnixDatagram),
     Fatal(DaemonError),
     Success,
 }
 
-
 /// Start -> InitHomes
-fn handle_start() -> Verdict {
-    Continue(DaemonState::InitHomes)
+fn handle_start() -> StepResult {
+    Ok(DaemonState::InitHomes)
 }
 
 /// InitHomes -> OpenSocket
-fn handle_init_homes() -> Verdict {
+fn handle_init_homes() -> StepResult {
     let homes = types::get_homes();
-    Continue(DaemonState::OpenSocket(homes))
+    Ok(DaemonState::OpenSocket(homes))
 }
 
 /// OpenSocket -> ReceiveRequest or Fatal
-fn handle_open_socket(homes: Homes) -> Verdict {
-    Continue(DaemonState::Success)
+fn handle_open_socket(homes: Homes) -> StepResult {
+    let socket_path = homes.data_home + "/socket";
+    UnixDatagram::bind(socket_path)
+        .map_err(DaemonError::SocketOpenErr)
+        .map(|_| DaemonState::Success)
+        // .map(DaemonState::ReceiveRequest)
 }
 
 /// Fatal
-fn handle_fatal(e: DaemonError) -> Verdict {
+fn handle_fatal(e: DaemonError) -> i32 {
     let _ = writeln!(&mut io::stderr(), "overseerd FATAL: {}", e);
-    End(1)
+    1
 }
 
 /// Success
-fn handle_success() -> Verdict {
+fn handle_success() -> i32 {
     println!("overseerd success");
-    End(0)
+    0
 }
 
 /// Execute one step in DaemonState state machine.
-pub fn execute_daemon_step(state: DaemonState) -> Verdict {
+pub fn execute_daemon_step(state: DaemonState) -> Verdict<DaemonState> {
     match state {
-        DaemonState::Start => handle_start(),
-        DaemonState::InitHomes => handle_init_homes(),
-        DaemonState::OpenSocket(homes) => handle_open_socket(homes),
-        DaemonState::Fatal(e) => handle_fatal(e),
-        DaemonState::Success => handle_success(),
-        _ => Continue(DaemonState::Fatal(DaemonError::TodoErr)),
+        DaemonState::Start => From::from(handle_start()),
+        DaemonState::InitHomes => From::from(handle_init_homes()),
+        DaemonState::OpenSocket(homes) => From::from(handle_open_socket(homes)),
+        DaemonState::Fatal(e) => From::from(handle_fatal(e)),
+        DaemonState::Success => From::from(handle_success()),
     }
 }

@@ -30,11 +30,13 @@ impl fmt::Display for ClientError {
 impl error::Error for DaemonError {
     fn description(&self) -> &str {
         match *self {
+            DaemonError::SocketOpenErr(_) => "Failed to open socket",
             DaemonError::TodoErr => "Todo",
         }
     }
     fn cause(&self) -> Option<&error::Error> {
         match *self {
+            DaemonError::SocketOpenErr(ref e) => Some(e),
             DaemonError::TodoErr => None,
         }
     }
@@ -43,6 +45,7 @@ impl error::Error for DaemonError {
 impl fmt::Display for DaemonError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
+            DaemonError::SocketOpenErr(_) => write!(f, "Failed to open socket"),
             DaemonError::TodoErr => write!(f, "TodoErr"),
         }
     }
