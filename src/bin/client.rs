@@ -61,16 +61,38 @@ enum ClientState {
     Exit(Result<(), ClientSMError>),
 }
 
-fn execute_sm<G, S, E, P>(
-    globals: &mut G, start_state: S, execute_step: E, is_finished: P) -> S
-    where E: Fn(&mut G, S) -> S,
-          P: Fn(S) -> bool {
-    start_state
+#[derive(Debug)]
+enum TestState {
+    Alpha(i32),
+    Beta(i32),
+    Gamma(i32),
+}
+
+fn test_exec(g: &mut i32, s: &TestState) -> Option<TestState> {
+    match *s {
+        TestState::Alpha(a) => Some(TestState::Beta(a * *g)),
+        TestState::Beta(a) => {
+            *g -= 1;
+            Some(TestState::Gamma(a + *g))
+        },
+        TestState::Gamma(_) => None
+    }
+}
+
+fn execute_sm<G, S, E>(globals: &mut G, start_state: S, execute_step: E) -> S
+        where E: Fn(&mut G, &S) -> Option<S> {
+    let mut state = start_state;
+
+    loop {
+        match execute_step(globals, &state) {
+            Some(next) => state = next,
+            None => return state,
+        }
+    }
 }
 
 fn main() {
-    println!("Hello from client");
-    let forty = 40;
-    let dex = forty + 4;
-    println!("{} is dex", dex);
+    let s = TestState::Alpha(1);
+    let mut g = 3;
+    println!("{:?}", execute_sm(&mut g, s, test_exec));
 }
