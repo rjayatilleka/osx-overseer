@@ -10,7 +10,7 @@ use std::io;
 use std::io::Write;
 use unix_socket::UnixDatagram;
 
-/// Represents errors in client state machine
+/// Represents errors in daemon state machine
 #[derive(Debug)]
 pub enum DaemonError {
     SocketOpenErr(io::Error),
@@ -25,17 +25,17 @@ impl From<DaemonError> for DaemonState {
 
 type StepResult = Result<DaemonState, DaemonError>;
 
-/// States for client state machine
+/// States for daemon state machine
 #[derive(Debug)]
 pub enum DaemonState {
     Start,
     InitHomes,
+    Success,
     OpenSocket(Homes),
+    Fatal(DaemonError),
     // ReceiveRequest(UnixDatagram),
     // ProcessRequest(UnixDatagram, Request),
     // SendResponse(UnixDatagram),
-    Fatal(DaemonError),
-    Success,
 }
 
 /// Start -> InitHomes
@@ -53,6 +53,7 @@ fn handle_init_homes() -> StepResult {
 fn handle_open_socket(homes: Homes) -> StepResult {
     let socket_path = homes.data_home + "/socket";
 
+    UnixDatagram::bind(socket_path)
         .map_err(DaemonError::SocketOpenErr)
         .map(|_| DaemonState::Success)
         // .map(DaemonState::ReceiveRequest)
