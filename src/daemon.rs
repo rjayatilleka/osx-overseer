@@ -25,8 +25,6 @@ impl From<DaemonError> for DaemonState {
 
 type StepResult = Result<DaemonState, DaemonError>;
 
-type Request = [u8; 10];
-
 /// States for client state machine
 #[derive(Debug)]
 pub enum DaemonState {
@@ -54,7 +52,7 @@ fn handle_init_homes() -> StepResult {
 /// OpenSocket -> ReceiveRequest or Fatal
 fn handle_open_socket(homes: Homes) -> StepResult {
     let socket_path = homes.data_home + "/socket";
-    UnixDatagram::bind(socket_path)
+
         .map_err(DaemonError::SocketOpenErr)
         .map(|_| DaemonState::Success)
         // .map(DaemonState::ReceiveRequest)
@@ -75,12 +73,14 @@ fn handle_success() -> i32 {
 // /// Execute one step in DaemonState state machine.
 // pub fn execute_daemon_step(state: DaemonState) -> Verdict<DaemonState> {
 //     sm_generate!(
-//         (DaemonState::Start, handle_start),
-//         (DaemonState::InitHomes, handle_init_homes),
-//         (DaemonState::OpenSocket, handle_open_socket),
-//         (DaemonState::Fatal, handle_fatal),
-//         (DaemonState::Success, handle_success))
-//     }
+//         state,
+//         DaemonState;
+//         Start => handle_start,
+//         InitHomes => handle_init_homes,
+//         OpenSocket => handle_open_socket,
+//         Fatal => handle_fatal,
+//         Success => handle_success
+//     )
 // }
 
 /// Execute one step in DaemonState state machine.
